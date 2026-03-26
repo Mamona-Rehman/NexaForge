@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "PHP Built-in Server",
+      "runtimeExecutable": "C:/xampp/php/php.exe",
+      "runtimeArgs": ["-S", "localhost:8000", "-t", "."],
+      "port": 8000
+    },
+    {
+      "name": "XAMPP Apache",
+      "runtimeExecutable": "C:/xampp/apache/bin/httpd.exe",
+      "runtimeArgs": ["-D", "FOREGROUND"],
+      "port": 80
+    }
+  ]
+}

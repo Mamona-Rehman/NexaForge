@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(vercel --version)",
+      "Bash(vercel --yes)",
+      "Bash(vercel --yes --name nexaforge-bugs)",
+      "Bash(vercel --prod --yes)"
+    ]
+  }
+}
