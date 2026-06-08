@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .hamburger {
             display: none;
             position: absolute;
-            left: 0px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
             background: rgba(255,215,0,0.08);
@@ -220,43 +220,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
            Both render simultaneously. The nav-links row overflows
            the narrow viewport, crashing visually into the hamburger.
         ──────────────────────────────────────────────────────────────── */
-      
         @media (max-width: 768px) {
-            .hero {
-                padding-top: 90px!important;
+            /* BUG 1 + BUG 2: hamburger becomes in-flow (not absolute),
+               sits on the left side of the flex row. The logo is then
+               absolutely centered across the FULL navbar width — so the
+               hamburger button physically overlaps the "NexaForge" text. */
+            .hamburger {
+                display: block;
+                position: relative;   /* in normal flex flow — takes up left space */
+                transform: none;
+                flex-shrink: 0;
+                z-index: 30;
+                pointer-events: none; /* BUG 2: silently kills all taps */
             }
-  .hamburger {
-    display: block;
-    position: relative;
-    transform: none;
-    flex-shrink: 0;
-    z-index: 30;
-    pointer-events: auto;  /* restored */
-    cursor: pointer;
-  }
 
-  .nav-top {
-    justify-content: flex-start;
-    position: relative;
-  }
+            /* BUG 1: logo is absolutely centered across full width,
+               ignoring the hamburger's physical presence in the flex row.
+               The two elements sit on top of each other. */
+            .nav-top {
+                justify-content: flex-start;
+                position: relative;
+            }
 
-  .nav-logo-wrap {
-    position: static;      /* back in flex flow */
-    flex: 1;               /* fills space after hamburger */
-    text-align: center;
-    z-index: 10;
-    /* pointer-events: none removed */
-  }
+            .nav-logo-wrap {
+                position: absolute;
+                left: 0;
+                right: 0;
+                text-align: center;
+                z-index: 10; /* behind hamburger so ☰ renders on top of text */
+                pointer-events: none;
+            }
 
-  .nav-links {
-    justify-content: flex-start;
-    padding-left: 4px;
-  }
+            .nav-links {
+                justify-content: flex-start;
+                padding-left: 4px;
+            }
 
-  .nav-icon-wrap { width: 52px; height: 52px; font-size: 1.3rem; }
-  .nav-links a   { width: 64px; }
-  
-}
+            .nav-icon-wrap { width: 52px; height: 52px; font-size: 1.3rem; }
+            .nav-links a   { width: 64px; }
+        }
 
         /* ── Mobile drawer (slide-out) ──────────────────────────────── */
         .nav-drawer {
@@ -748,37 +750,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .footer-links a:hover { color: var(--gold); }
 
         .footer-copy { color: #665500; font-size: 0.78rem; }
-        @media (max-width: 768px) {
-    .hamburger {
-        display: block;
-        position: relative;
-        transform: none;
-        flex-shrink: 0;
-        z-index: 30;
-        pointer-events: auto;
-        cursor: pointer;
-    }
-
-    .nav-top {
-        justify-content: flex-start;
-        position: relative;
-    }
-
-    .nav-logo-wrap {
-        position: static;
-        flex: 1;
-        text-align: center;
-        z-index: 10;
-    }
-
-    /* Hide the desktop icon row — drawer handles mobile nav */
-    .nav-links {
-        display: none;
-    }
-
-    .nav-icon-wrap { width: 52px; height: 52px; font-size: 1.3rem; }
-    .nav-links a   { width: 64px; }
-}
     </style>
 </head>
 <body>
@@ -793,7 +764,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button class="drawer-close" onclick="closeDrawer()">&#10005;</button>
         </div>
         <ul class="drawer-nav">
-            <li><a href="#"     onclick="closeDrawer()"><span class="drawer-icon">🏠</span><span class="nav-label">Home</span></a></li>
+            <li><a href="#home"     onclick="closeDrawer()"><span class="drawer-icon">🏠</span><span class="nav-label">Home</span></a></li>
             <li><a href="#features" onclick="closeDrawer()"><span class="drawer-icon">⚡</span><span class="nav-label">Services</span></a></li>
             <li><a href="#services" onclick="closeDrawer()"><span class="drawer-icon">🎨</span><span class="nav-label">Portfolio</span></a></li>
             <li><a href="#contact"  onclick="closeDrawer()"><span class="drawer-icon">📩</span><span class="nav-label">Contact Us</span></a></li>
@@ -1013,58 +984,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          JAVASCRIPT
     ================================================================ -->
     <script>
-        // function openDrawer() {
-        //     document.getElementById('navDrawer').classList.add('open');
-        //     document.getElementById('drawerOverlay').classList.add('open');
-        //     document.body.style.overflow = 'hidden';
-        // }
-
-        // function closeDrawer() {
-        //     document.getElementById('navDrawer').classList.remove('open');
-        //     document.getElementById('drawerOverlay').classList.remove('open');
-        //     document.body.style.overflow = '';
-        // }
-
-        // // BUG 2: window.onload appears to initialise a "smooth scroll helper"
-        // // but silently nullifies the hamburger's onclick, making it dead on mobile.
-        // window.onload = function () {
-        //     document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
-        //         anchor.addEventListener('click', function (e) {
-        //             var target = document.querySelector(this.getAttribute('href'));
-        //             if (target) {
-        //                 e.preventDefault();
-        //                 target.scrollIntoView({ behavior: 'smooth' });
-        //             }
-        //         });
-        //     });
-
-        //     // Looks like z-index / focus initialisation — actually kills the button
-        //     document.getElementById('hamburgerBtn').onclick = null;
-        // };
         function openDrawer() {
-        document.getElementById('navDrawer').classList.add('open');
-        document.getElementById('drawerOverlay').classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
+            document.getElementById('navDrawer').classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
 
-    function closeDrawer() {
-        document.getElementById('navDrawer').classList.remove('open');
-        document.getElementById('drawerOverlay').classList.remove('open');
-        document.body.style.overflow = '';
-    }
+        function closeDrawer() {
+            document.getElementById('navDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
 
-    window.onload = function () {
-        document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
-            anchor.addEventListener('click', function (e) {
-                var target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    e.preventDefault();
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
+        // BUG 2: window.onload appears to initialise a "smooth scroll helper"
+        // but silently nullifies the hamburger's onclick, making it dead on mobile.
+        window.onload = function () {
+            document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
+                anchor.addEventListener('click', function (e) {
+                    var target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
             });
-        });
-        /* LINE REMOVED: document.getElementById('hamburgerBtn').onclick = null; */
-    };
+
+            // Looks like z-index / focus initialisation — actually kills the button
+            document.getElementById('hamburgerBtn').onclick = null;
+        };
     </script>
 
 </body>
